@@ -25,6 +25,8 @@
 - Supabaseリモートプロジェクトへmigrationを適用し、Edge Functionsをデプロイし、初期管理者を `owner` として登録した
 - iOSアプリに Supabase公開設定取得用の `AppConfigClient` 土台、`supabase_public_config.json`、取得結果のローカルキャッシュを追加した
 - `get-published-config` を認証なし公開Functionとして再デプロイし、iOSが service role key や anon key なしで公開JSONだけを取得できるようにした
+- やることリスト本体に `RuleEngine` のtodo出力を接続し、固定タスクとの重複を抑えるようにした
+- `VersionNumber` を追加し、iOS最新判定を配信JSONの `latest_global_version` と安全に比較できるようにした
 - タブは中央（apple ネイティブ）に戻して、いったん `TabView` ベースで確認できる状態にした
 - マイiPhoneホームは、現在のiPhoneを主役にして情報量を少し絞った
 - 「このiPhoneを検出しました」は登録済み状態で常設カードにせず、軽いサマリー表示にした

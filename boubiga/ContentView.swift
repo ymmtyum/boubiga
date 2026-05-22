@@ -53,7 +53,7 @@ private struct MyIPhoneHomeView: View {
     private var data: IPhoneAppData { store.snapshot }
     private var openTaskCount: Int {
         guard let current = data.currentOwnership else { return 0 }
-        return data.openTasks(for: current.id).count
+        return store.pendingActionCount(for: current, isPro: entitlementManager.isPro)
     }
 
     var body: some View {
@@ -75,7 +75,7 @@ private struct MyIPhoneHomeView: View {
                             StorageMeterCard(ownership: current)
                             UsagePeriodMeterCard(ownership: current)
                             TradeValueMeterCard(ownership: current)
-                            DeviceInfoMeterCard(ownership: current)
+                            DeviceInfoMeterCard(ownership: current, latestIOSVersion: store.remoteConfig.ios.latestGlobalVersion)
                         }
 
                         if current.latestBatteryCondition == nil && current.latestBatteryHealth == nil {
@@ -450,6 +450,7 @@ private struct TradeValueMeterCard: View {
 
 private struct DeviceInfoMeterCard: View {
     let ownership: IPhoneOwnership
+    let latestIOSVersion: String
 
     var body: some View {
         MeterCard(
@@ -471,8 +472,8 @@ private struct DeviceInfoMeterCard: View {
     }
 
     private var osStatusText: String {
-        guard let current = osVersionNumbers else { return "未取得" }
-        return compareVersion(current, latestOSVersion) >= 0 ? "最新です" : "最新ではありません"
+        guard let current = currentVersion, let latest = VersionNumber(latestIOSVersion) else { return "未取得" }
+        return current >= latest ? "最新です" : "最新ではありません"
     }
 
     private var osFooterText: String {
@@ -482,34 +483,17 @@ private struct DeviceInfoMeterCard: View {
         return "\(detectedAt.formatted(date: .numeric, time: .omitted))確認"
     }
 
-    private var osVersionNumbers: [Int]? {
+    private var currentVersion: VersionNumber? {
         guard let version = ownership.latestSnapshot?.osVersion else { return nil }
-        let numbers = version
-            .split { !$0.isNumber }
-            .compactMap { Int($0) }
-        return numbers.isEmpty ? nil : numbers
+        return VersionNumber(version)
     }
 
-    private var latestOSVersion: [Int] { [26, 5] }
-
     private var tint: Color {
-        guard let current = osVersionNumbers else { return .secondary }
-        if compareVersion(current, latestOSVersion) < 0 {
+        guard let current = currentVersion, let latest = VersionNumber(latestIOSVersion) else { return .secondary }
+        if current < latest {
             return Color(red: 0.78, green: 0.45, blue: 0.08)
         }
         return Color(red: 0.11, green: 0.45, blue: 0.33)
-    }
-
-    private func compareVersion(_ lhs: [Int], _ rhs: [Int]) -> Int {
-        let count = max(lhs.count, rhs.count)
-        for index in 0..<count {
-            let left = index < lhs.count ? lhs[index] : 0
-            let right = index < rhs.count ? rhs[index] : 0
-            if left != right {
-                return left < right ? -1 : 1
-            }
-        }
-        return 0
     }
 }
 
@@ -1549,17 +1533,26 @@ private struct TaskFlowView: View {
     @State private var experienceDraft = ExperienceLogDraft()
     @State private var selectedConcern = "特にない"
     @State private var selectedTask: IPhoneTaskType?
+    @State private var selectedRule: RuleDefinition?
 
     private var taskTypes: [IPhoneTaskType] {
         guard let ownership else { return [] }
-        let types = store.snapshot.openTasks(for: ownership.id).map(\.type)
+        let ruleCoveredTypes = Set(ruleTodoItems.compactMap { IPhoneTaskType(ruleActionType: $0.actionType) })
+        let types = store.snapshot.openTasks(for: ownership.id)
+            .map(\.type)
+            .filter { !ruleCoveredTypes.contains($0) }
         guard let preferredTask, types.contains(preferredTask) else { return types }
         return [preferredTask] + types.filter { $0 != preferredTask }
     }
 
+    private var ruleTodoItems: [RuleDefinition] {
+        guard let ownership else { return [] }
+        return store.ruleResult(for: ownership).todoItems
+    }
+
     var body: some View {
         NavigationStack {
-            if let ownership, !taskTypes.isEmpty {
+            if let ownership, !taskTypes.isEmpty || !ruleTodoItems.isEmpty {
                 if let selectedTask {
                     actionForm(for: selectedTask, ownershipID: ownership.id)
                         .navigationTitle(selectedTask.navigationTitle)
@@ -1576,6 +1569,16 @@ private struct TaskFlowView: View {
                                         save(task: selectedTask, for: ownership.id)
                                     }
                                     .disabled(isTaskInvalid(selectedTask))
+                                }
+                            }
+                        }
+                } else if let selectedRule {
+                    ruleDetail(rule: selectedRule)
+                        .navigationTitle("確認")
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button("一覧") {
+                                    self.selectedRule = nil
                                 }
                             }
                         }
@@ -1605,6 +1608,21 @@ private struct TaskFlowView: View {
 
     private var taskList: some View {
         List {
+            if !ruleTodoItems.isEmpty {
+                Section {
+                    ForEach(ruleTodoItems) { rule in
+                        Button {
+                            handleRuleTap(rule)
+                        } label: {
+                            RuleTaskRow(rule: rule)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("今の状態から出ていること")
+                }
+            }
+
             Section {
                 ForEach(taskTypes, id: \.self) { task in
                     Button {
@@ -1634,9 +1652,34 @@ private struct TaskFlowView: View {
                     .buttonStyle(.plain)
                 }
             } header: {
-                Text("今やると判断しやすくなること")
+                Text(ruleTodoItems.isEmpty ? "今やると判断しやすくなること" : "記録しておくこと")
             } footer: {
                 Text("まず内容を確認してから、必要な項目だけ進められます。")
+            }
+        }
+    }
+
+    private func ruleDetail(rule: RuleDefinition) -> some View {
+        Form {
+            Section {
+                Label(rule.title, systemImage: rule.symbolName)
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary, rule.tint)
+                Text(rule.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Button {
+                    performRuleAction(rule)
+                } label: {
+                    Text(rule.ctaLabel ?? "進める")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(rule.tint)
             }
         }
     }
@@ -1750,6 +1793,24 @@ private struct TaskFlowView: View {
         }
     }
 
+    private func handleRuleTap(_ rule: RuleDefinition) {
+        if rule.actionType == "battery_ocr" || rule.actionType == "battery_compare" {
+            performRuleAction(rule)
+        } else {
+            selectedRule = rule
+        }
+    }
+
+    private func performRuleAction(_ rule: RuleDefinition) {
+        switch rule.actionType {
+        case "battery_ocr", "battery_compare":
+            dismiss()
+            onStartBatteryOCR()
+        default:
+            selectedRule = rule
+        }
+    }
+
     private func applySelectedConcern() {
         switch selectedConcern {
         case "バッテリー":
@@ -1771,6 +1832,57 @@ private struct TaskFlowView: View {
             experienceDraft.sizeFit = .good
             experienceDraft.cameraSatisfaction = "特に不満はない"
             experienceDraft.upgradeIntent = .keepUsing
+        }
+    }
+}
+
+private struct RuleTaskRow: View {
+    let rule: RuleDefinition
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: rule.symbolName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(rule.tint)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(rule.title)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(rule.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+private extension RuleDefinition {
+    var symbolName: String {
+        switch actionType {
+        case "battery_ocr", "battery_compare":
+            return "battery.75percent"
+        case "storage_guide":
+            return "internaldrive"
+        default:
+            return "checkmark.circle"
+        }
+    }
+
+    var tint: Color {
+        switch severity {
+        case .critical:
+            return Color(red: 0.75, green: 0.22, blue: 0.12)
+        case .warning:
+            return Color(red: 0.78, green: 0.45, blue: 0.08)
+        default:
+            return Color(red: 0.11, green: 0.45, blue: 0.33)
         }
     }
 }

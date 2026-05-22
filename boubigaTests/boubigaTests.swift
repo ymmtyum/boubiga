@@ -122,6 +122,23 @@ struct boubigaTests {
     }
 
     @MainActor
+    @Test func pendingActionCountDeduplicatesRuleCoveredTasks() async throws {
+        let store = AppStore(data: .sample)
+        let ownership = try #require(store.snapshot.currentOwnership)
+
+        #expect(store.pendingActionCount(for: ownership) == 2)
+    }
+
+    @Test func versionNumberComparesMultiDigitComponents() async throws {
+        let version26_10 = try #require(VersionNumber("iOS 26.10"))
+        let version26_5 = try #require(VersionNumber("26.5"))
+        let version26_5_0 = try #require(VersionNumber("26.5.0"))
+
+        #expect(version26_10 > version26_5)
+        #expect(version26_5 == version26_5_0)
+    }
+
+    @MainActor
     @Test func appConfigStoreUsesCachedRemoteConfig() async throws {
         let suiteName = "boubiga.tests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))

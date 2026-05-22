@@ -35,13 +35,15 @@
 - サーバー設計メモを `docs/server/supabase_design.md` に整理
 - Supabaseキー記入用の `.env.local` 雛形、共有用 `.env.example`、セットアップメモを追加
 - iOS側に公開設定取得用の `AppConfigClient` 土台、Supabase公開URL設定、取得結果キャッシュを追加
+- やることリスト本体に `RuleEngine` のtodo出力を接続し、固定タスクとの重複を抑制
+- `VersionNumber` によるiOSバージョン比較を追加し、配信JSONの最新iOS判定に接続
 
 次に進める:
 
 - 実機で「登録データを消してやり直す」が完全リセットとして動くか確認
 - 実機でルール由来インサイト、診断結果、Paywall表示、商品価格表示の導線を確認
 - 実機またはTestFlight/Sandboxで購入・復元・Pro解放を確認
-- やることリスト本体と使いづらさ解消カードを `RuleEngine` の結果へさらに統合
+- 実機でSupabase公開JSON取得、やることリスト表示、iOS最新判定が期待通りか確認
 - Supabaseプロジェクト作成後、migration適用、管理者owner追加、Edge Functionsデプロイを行う
 - やることリスト本体と使いづらさ解消カードを `RuleEngine` の結果へさらに統合
 
@@ -1413,15 +1415,15 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 [x] DeviceSnapshot の土台を作成（現時点では `AppModels.swift` 内）
 [x] RuleDefinition の土台を作成（現時点では `AppModels.swift` 内）
 [x] RuleEngine の土台を作成（現時点では `AppModels.swift` 内）
-[ ] TodoListViewをRuleEngine出力に接続
+[x] TodoListViewをRuleEngine出力に接続（現時点では `TaskFlowView` 内）
 [x] Caution/使いづらさ解消表示をRuleEngine出力に一部接続（ホームのルール由来インサイト）
 [x] DiagnosisResultViewを作成
 [x] Pro限定表示のロックUIを作成
 [x] ローカルキャッシュ保存を実装
 [x] Supabase公開JSON取得とキャッシュ保存を実装
-[ ] バージョン比較ユーティリティを実装
+[x] バージョン比較ユーティリティを実装
 [x] RuleEngineのUnit Testを追加
-[ ] VersionCompareのUnit Testを追加
+[x] VersionCompareのUnit Testを追加
 ```
 
 ### 13.2 Supabase側

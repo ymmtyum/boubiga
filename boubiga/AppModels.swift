@@ -463,6 +463,30 @@ struct MatchedRuleResult: Equatable {
     static let empty = MatchedRuleResult(todoItems: [], cautionItems: [], solveItems: [], diagnosisHints: [])
 }
 
+struct VersionNumber: Comparable, Equatable {
+    let components: [Int]
+
+    init?(_ text: String) {
+        let parsedComponents = text
+            .split { !$0.isNumber }
+            .compactMap { Int($0) }
+        guard !parsedComponents.isEmpty else { return nil }
+        self.components = parsedComponents
+    }
+
+    static func < (lhs: VersionNumber, rhs: VersionNumber) -> Bool {
+        let count = max(lhs.components.count, rhs.components.count)
+        for index in 0..<count {
+            let left = index < lhs.components.count ? lhs.components[index] : 0
+            let right = index < rhs.components.count ? rhs.components[index] : 0
+            if left != right {
+                return left < right
+            }
+        }
+        return false
+    }
+}
+
 struct AppConfigClientConfiguration: Codable, Equatable {
     let supabaseURL: URL
 
@@ -1216,6 +1240,21 @@ private extension JSONDecoder {
     }
 }
 
+extension IPhoneTaskType {
+    init?(ruleActionType: String?) {
+        switch ruleActionType {
+        case "battery_ocr", "battery_compare":
+            self = .inputBatteryHealth
+        case "trade_value_check":
+            self = .checkTradeInValue
+        case "experience_log":
+            self = .recordFirstImpression
+        default:
+            return nil
+        }
+    }
+}
+
 @MainActor
 final class AppStore: ObservableObject {
     @Published private(set) var ownerships: [IPhoneOwnership]
@@ -1295,6 +1334,13 @@ final class AppStore: ObservableObject {
 
     func ruleResult(for ownership: IPhoneOwnership, isPro: Bool = false) -> MatchedRuleResult {
         RuleEngine.evaluate(snapshot: DeviceSnapshot(ownership: ownership), config: remoteConfig, isPro: isPro)
+    }
+
+    func pendingActionCount(for ownership: IPhoneOwnership, isPro: Bool = false) -> Int {
+        let ruleTodos = ruleResult(for: ownership, isPro: isPro).todoItems
+        let hiddenTaskTypes = Set(ruleTodos.compactMap { IPhoneTaskType(ruleActionType: $0.actionType) })
+        let visibleTaskCount = snapshot.openTasks(for: ownership.id).filter { !hiddenTaskTypes.contains($0.type) }.count
+        return ruleTodos.count + visibleTaskCount
     }
 
     func refreshRemoteConfig() async {

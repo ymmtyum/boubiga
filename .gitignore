@@ -18,3 +18,9 @@ xcuserdata/
 # Supabase local runtime
 .branches/
 .temp/
+
+# Admin web local runtime
+admin/.env.local
+admin/.next/
+admin/node_modules/
+admin/tsconfig.tsbuildinfo

@@ -86,6 +86,18 @@ boubiga は、iPhone の所有状態と使用感を軽く記録し、買い替�
 - 通信に失敗した場合は、前回キャッシュまたは `bundled_app_config.json` の同梱値で動きます。
 - iOSアプリには service role key を入れず、`supabase_public_config.json` に公開設定取得用の Supabase URL だけを同梱しています。
 
+## Web管理画面
+
+- `admin/` に Next.js ベースの管理画面MVPがあります。
+- `admin/.env.local` には、既存の `.env.local` から Supabase URL と anon key だけを入れてローカル起動できるようにしています。
+- 管理画面は Supabase Auth でログインします。管理操作はログインユーザーのアクセストークンで `preview-rules` / `publish-config` を呼びます。
+- 公開中の設定バージョン、公開日時、最新iOS、ルール数、しきい値を確認できます。
+- 最新iOS、リリース日、重要度、表示メッセージ、出典URLを下書きとして編集できます。
+- バッテリー最大容量と空き容量のしきい値を編集できます。
+- 端末スナップショットを入力して、下書きまたは公開済みルールのプレビューを確認できます。
+- 公開ボタンから、現在のDB内容を新しい配信JSONとして公開する処理を実行できます。
+- action_items / rules / guides の詳細編集UIは次フェーズです。
+
 ## 診断とPro導線
 
 - ホーム最下部の iPhone診断カードから、簡易診断結果シートを開けます。
@@ -111,7 +123,7 @@ boubiga は、iPhone の所有状態と使用感を軽く記録し、買い替�
 ## 現在の実装方針
 
 - SwiftUI ベースで実装しています。
-- 最小ローカル永続化、ローカルJSONルール、診断結果シート、Pro/StoreKit土台、App Store Connectの商品作成、Supabaseサーバー土台、iOS側の公開JSON取得、やることリスト本体のRuleEngine接続は完了済みです。次は管理画面MVPに進みます。
+- 最小ローカル永続化、ローカルJSONルール、診断結果シート、Pro/StoreKit土台、App Store Connectの商品作成、Supabaseサーバー土台、iOS側の公開JSON取得、やることリスト本体のRuleEngine接続、管理画面MVPは完了済みです。次は管理画面の action/rule/guide 編集UI、または実機での購入・公開設定取得確認に進みます。
 - 最新OSの詳細、価格、容量削減などのガイドは、将来的に運営側で管理するサーバーから配信する方針です。
 - 画面はなるべくシンプルにし、あなたの iPhone とその状態がすぐ分かる構成を優先しています。
 - 最新の実装計画は `boubiga_implementation_plan.md` に一本化しています。

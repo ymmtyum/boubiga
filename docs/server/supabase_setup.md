@@ -65,3 +65,30 @@ Supabase作成時のData API設定は次の方針にする。
 ```
 
 service role key はiOSアプリに入れない。
+
+## 管理画面側
+
+管理画面は `admin/` に置く。ローカル起動時は `admin/.env.local` に公開URLとanon keyだけを入れる。
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+
+`admin/.env.local` もGit管理しない。service role key は管理画面に入れない。
+
+起動:
+
+```bash
+cd admin
+npm install
+npm run dev -- --port 3000
+```
+
+確認URL:
+
+```text
+http://localhost:3000
+```
+
+ログインには、Supabase Authで作成し、`admin_profiles` に `owner` または `editor` として登録したユーザーを使う。

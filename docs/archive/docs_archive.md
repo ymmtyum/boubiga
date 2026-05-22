@@ -27,6 +27,8 @@
 - `get-published-config` を認証なし公開Functionとして再デプロイし、iOSが service role key や anon key なしで公開JSONだけを取得できるようにした
 - やることリスト本体に `RuleEngine` のtodo出力を接続し、固定タスクとの重複を抑えるようにした
 - `VersionNumber` を追加し、iOS最新判定を配信JSONの `latest_global_version` と安全に比較できるようにした
+- `admin/` に Next.js 管理画面MVPを追加し、Supabase Authログイン、公開設定サマリー、最新iOS下書き編集、しきい値編集、ルールプレビュー、公開処理を使える土台を作った
+- 管理画面用の `admin/.env.example` とセットアップ手順を追加し、service role key をブラウザ側に入れない運用にした
 - タブは中央（apple ネイティブ）に戻して、いったん `TabView` ベースで確認できる状態にした
 - マイiPhoneホームは、現在のiPhoneを主役にして情報量を少し絞った
 - 「このiPhoneを検出しました」は登録済み状態で常設カードにせず、軽いサマリー表示にした

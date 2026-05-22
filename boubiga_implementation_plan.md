@@ -37,6 +37,8 @@
 - iOS側に公開設定取得用の `AppConfigClient` 土台、Supabase公開URL設定、取得結果キャッシュを追加
 - やることリスト本体に `RuleEngine` のtodo出力を接続し、固定タスクとの重複を抑制
 - `VersionNumber` によるiOSバージョン比較を追加し、配信JSONの最新iOS判定に接続
+- `admin/` に Next.js 管理画面MVPを追加
+- 管理画面で Supabase Authログイン、公開設定確認、最新iOS下書き編集、しきい値編集、ルールプレビュー、公開処理を実行できる土台を追加
 
 次に進める:
 
@@ -44,15 +46,18 @@
 - 実機でルール由来インサイト、診断結果、Paywall表示、商品価格表示の導線を確認
 - 実機またはTestFlight/Sandboxで購入・復元・Pro解放を確認
 - 実機でSupabase公開JSON取得、やることリスト表示、iOS最新判定が期待通りか確認
-- Supabaseプロジェクト作成後、migration適用、管理者owner追加、Edge Functionsデプロイを行う
 - やることリスト本体と使いづらさ解消カードを `RuleEngine` の結果へさらに統合
+- 管理画面ログイン後に、下書き保存、プレビュー、公開処理が実Supabaseで通るか確認
+- 管理画面に action_items / rules / guides の一覧・編集UIを追加
 
 ユーザー側の操作が必要:
 
 - 実機またはSimulatorで、初回登録後にアプリを終了・再起動して保存が残るか確認
 - バッテリー状態画面のスクショを用意し、OCR結果が妥当か確認
 - App Store Connectの商品反映後、Paywallに価格が出るか実機で確認
-- Supabaseに進む場合は、プロジェクト作成、プロジェクトURL、anon key、service role key、管理者メールを用意する
+- 管理画面 `http://localhost:3000` に、Supabase Authで作成した管理者メール/パスワードでログインできるか確認する
+- ログイン後、公開設定表示、下書き保存、プレビュー、公開ボタンを押した時の結果を確認する
+- 管理者ユーザーにパスワードを設定していない場合は、Supabase Auth側でパスワード設定または再発行を行う
 
 ### 0.2 実装優先順
 
@@ -63,7 +68,7 @@
 5. Pro詳細診断入口とPaywallモック: 初期版完了
 6. StoreKit 2買い切りPro: アプリ側土台完了、App Store Connectの商品作成完了、実機購入確認待ち
 7. Supabase配信JSON: サーバー側土台とiOS取得接続は完了
-8. Web管理画面
+8. Web管理画面: 初期MVP完了、action/rule/guide編集は次フェーズ
 9. iOS最新版自動検出
 
 MVPでは、次の構成で進める。
@@ -866,7 +871,7 @@ POST /functions/v1/check-ios-release
 Next.js
 Supabase Auth
 Supabase JS Client
-Tailwind CSS
+Plain CSS
 ```
 
 ### 8.2 画面一覧
@@ -1338,23 +1343,25 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 
 作業:
 
-- Next.js管理画面作成
-- Supabase Authログイン実装
-- Dashboard作成
-- iOS管理画面
-- しきい値管理画面
+- Next.js管理画面作成: 完了
+- Supabase Authログイン実装: 完了
+- Dashboard作成: 公開設定サマリーの初期版は完了
+- iOS管理画面: 最新iOS下書き編集の初期版は完了
+- しきい値管理画面: バッテリー/容量しきい値編集の初期版は完了
 - action_items管理画面
 - rule_conditions管理画面
 - guides管理画面
 - preview-rules Edge Function作成: 完了
 - publish-config Edge Function作成: 完了
+- preview画面: 完了
+- publish画面: 完了
 
 完了条件:
 
-- Web上でやることリスト項目を作成できる
-- 条件をUIから設定できる
-- プレビューで表示結果を確認できる
-- 公開ボタンでアプリ配信JSONが更新される
+- Web上でやることリスト項目を作成できる: 未完了
+- 条件をUIから設定できる: 未完了
+- プレビューで表示結果を確認できる: 実装済み、ログイン後の実操作確認待ち
+- 公開ボタンでアプリ配信JSONが更新される: 実装済み、ログイン後の実操作確認待ち
 
 ---
 
@@ -1458,18 +1465,18 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 ### 13.3 管理画面側
 
 ```text
-[ ] Next.jsプロジェクト作成
-[ ] Supabase Authログイン実装
-[ ] Admin layout作成
-[ ] Dashboard作成
-[ ] iOS管理画面作成
-[ ] しきい値管理画面作成
+[x] Next.jsプロジェクト作成
+[x] Supabase Authログイン実装
+[x] Admin layout作成
+[x] Dashboard作成（公開設定サマリー）
+[x] iOS管理画面作成（最新iOS下書き編集）
+[x] しきい値管理画面作成（バッテリー/容量）
 [ ] action_items一覧/編集画面作成
 [ ] rules編集画面作成
 [ ] rule condition builder作成
 [ ] guides一覧/編集画面作成
-[ ] preview画面作成
-[ ] publish画面作成
+[x] preview画面作成
+[x] publish画面作成
 [ ] rollback UI作成
 ```
 

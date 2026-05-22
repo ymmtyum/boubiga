@@ -51,12 +51,14 @@ Admin Web
 
 ### get-published-config
 
-アプリ用。認証なしで現在公開中の `published_configs.config_json` だけを返す。
+アプリ用。認証なしで現在公開中の `published_configs.config_json` だけを返す。Edge Function側は service role でDBを読み、返すデータを current の公開JSONに限定する。
 
 必要な環境変数:
 
 - `SUPABASE_URL`
 - `BOUBIGA_SUPABASE_SERVICE_ROLE_KEY`
+
+デプロイ時は `--no-verify-jwt` を付ける。
 
 ### preview-rules
 
@@ -102,11 +104,12 @@ iOSアプリの `RemoteAppConfig` が読めるよう、公開JSONは同梱JSON�
 5. Edge Functions をデプロイする。
 6. `SUPABASE_URL`、`SUPABASE_ANON_KEY`、`SUPABASE_SERVICE_ROLE_KEY` を設定する。
 7. `get-published-config` で初期JSONが返ることを確認する。
+8. iOS側の `supabase_public_config.json` に公開用 Supabase URL を入れる。
 
 IDやキーの記入場所は `docs/server/supabase_setup.md` を参照する。実値は `.env.local` にだけ置き、共有用には `.env.example` を使う。
 
 ## 後続タスク
 
-- iOS側に `AppConfigClient` / `AppConfigStore` を分離して、公開JSON取得とローカルキャッシュを追加する。
+- 必要に応じて、現時点では `AppModels.swift` 内にある `AppConfigClient` / `AppConfigStore` を `Services/` へ分割する。
 - 管理画面を作り、Authログイン、ルール編集、プレビュー、公開ボタンを接続する。
 - 将来、StoreKitのサーバー検証やProユーザー同期を追加する場合は、別スキーマとして扱う。

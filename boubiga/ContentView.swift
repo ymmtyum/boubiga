@@ -33,6 +33,7 @@ struct ContentView: View {
             isShowingOnboarding = needsOnboarding
         }
         .task {
+            await store.refreshRemoteConfig()
             await entitlementManager.loadProducts()
         }
     }

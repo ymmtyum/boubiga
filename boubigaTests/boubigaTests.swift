@@ -120,4 +120,41 @@ struct boubigaTests {
         #expect(result.cautionItems.isEmpty)
         #expect(result.solveItems.isEmpty)
     }
+
+    @MainActor
+    @Test func appConfigStoreUsesCachedRemoteConfig() async throws {
+        let suiteName = "boubiga.tests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+
+        let cachedConfig = RemoteAppConfig(
+            version: 99,
+            publishedAt: Date(timeIntervalSince1970: 1_779_408_000),
+            ios: RemoteIOSConfig(
+                latestGlobalVersion: "99.9",
+                releaseDate: nil,
+                severity: .warning,
+                message: "テスト設定"
+            ),
+            thresholds: RemoteThresholdConfig(
+                batteryWarningPercent: 90,
+                batteryCriticalPercent: 75,
+                storageWarningGB: 30,
+                storageCriticalGB: 8
+            ),
+            rules: []
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(cachedConfig)
+        defaults.set(data, forKey: "boubiga.remoteAppConfigCache.v1")
+        defaults.set(Date(timeIntervalSince1970: 1_779_408_000), forKey: "boubiga.remoteAppConfigLastFetchedAt.v1")
+
+        let store = AppConfigStore(defaults: defaults, client: nil)
+
+        #expect(store.config.version == 99)
+        #expect(store.config.ios.latestGlobalVersion == "99.9")
+
+        defaults.removePersistentDomain(forName: suiteName)
+    }
 }

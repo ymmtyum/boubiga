@@ -34,6 +34,7 @@
 - Supabase Edge Functions の `get-published-config` / `preview-rules` / `publish-config` を追加
 - サーバー設計メモを `docs/server/supabase_design.md` に整理
 - Supabaseキー記入用の `.env.local` 雛形、共有用 `.env.example`、セットアップメモを追加
+- iOS側に公開設定取得用の `AppConfigClient` 土台、Supabase公開URL設定、取得結果キャッシュを追加
 
 次に進める:
 
@@ -42,7 +43,7 @@
 - 実機またはTestFlight/Sandboxで購入・復元・Pro解放を確認
 - やることリスト本体と使いづらさ解消カードを `RuleEngine` の結果へさらに統合
 - Supabaseプロジェクト作成後、migration適用、管理者owner追加、Edge Functionsデプロイを行う
-- iOS側の `AppConfigClient` を追加し、Supabase公開JSON取得とローカルキャッシュへ接続する
+- やることリスト本体と使いづらさ解消カードを `RuleEngine` の結果へさらに統合
 
 ユーザー側の操作が必要:
 
@@ -59,7 +60,7 @@
 4. 使用感ログと簡易診断結果画面の磨き込み: 診断結果シートの初期版完了
 5. Pro詳細診断入口とPaywallモック: 初期版完了
 6. StoreKit 2買い切りPro: アプリ側土台完了、App Store Connectの商品作成完了、実機購入確認待ち
-7. Supabase配信JSON: サーバー側土台は完了、iOS取得接続は未着手
+7. Supabase配信JSON: サーバー側土台とiOS取得接続は完了
 8. Web管理画面
 9. iOS最新版自動検出
 
@@ -1311,15 +1312,15 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 
 作業:
 
-- Supabaseプロジェクト作成: ユーザー操作待ち
+- Supabaseプロジェクト作成: 完了
 - DB schema作成: 完了
 - RLS設定: 完了
 - get-published-config Edge Function作成: 完了
 - preview-rules Edge Function作成: 完了
 - publish-config Edge Function作成: 完了
 - published_configsに初期JSON登録: seed SQL追加済み
-- iOSアプリにAppConfigClient追加: 未着手
-- 取得結果のローカルキャッシュ実装: 未着手
+- iOSアプリにAppConfigClient追加: 完了（現時点では `AppModels.swift` 内）
+- 取得結果のローカルキャッシュ実装: 完了
 
 完了条件:
 
@@ -1408,7 +1409,7 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 [x] RemoteAppConfig の土台を作成（現時点では `AppModels.swift` 内）
 [x] bundled_app_config.json を追加
 [x] AppConfigStore の土台を作成（現時点では `AppModels.swift` 内）
-[ ] AppConfigClient.swift を作成
+[x] AppConfigClient の土台を作成（現時点では `AppModels.swift` 内）
 [x] DeviceSnapshot の土台を作成（現時点では `AppModels.swift` 内）
 [x] RuleDefinition の土台を作成（現時点では `AppModels.swift` 内）
 [x] RuleEngine の土台を作成（現時点では `AppModels.swift` 内）
@@ -1417,6 +1418,7 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 [x] DiagnosisResultViewを作成
 [x] Pro限定表示のロックUIを作成
 [x] ローカルキャッシュ保存を実装
+[x] Supabase公開JSON取得とキャッシュ保存を実装
 [ ] バージョン比較ユーティリティを実装
 [x] RuleEngineのUnit Testを追加
 [ ] VersionCompareのUnit Testを追加

@@ -463,6 +463,48 @@ struct MatchedRuleResult: Equatable {
     static let empty = MatchedRuleResult(todoItems: [], cautionItems: [], solveItems: [], diagnosisHints: [])
 }
 
+struct AppConfigClientConfiguration: Codable, Equatable {
+    let supabaseURL: URL
+
+    var publishedConfigURL: URL {
+        supabaseURL.appending(path: "functions/v1/get-published-config")
+    }
+
+    static func bundled() -> AppConfigClientConfiguration? {
+        guard let url = Bundle.main.url(forResource: "supabase_public_config", withExtension: "json"),
+              let data = try? Data(contentsOf: url) else {
+            return nil
+        }
+        return try? JSONDecoder.remoteConfig.decode(AppConfigClientConfiguration.self, from: data)
+    }
+}
+
+struct AppConfigClient {
+    enum ClientError: Error {
+        case invalidResponse
+        case httpStatus(Int)
+    }
+
+    let configuration: AppConfigClientConfiguration
+    var session: URLSession = .shared
+
+    func fetchPublishedConfig() async throws -> RemoteAppConfig {
+        var request = URLRequest(url: configuration.publishedConfigURL)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.timeoutInterval = 12
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ClientError.invalidResponse
+        }
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw ClientError.httpStatus(httpResponse.statusCode)
+        }
+        return try JSONDecoder.remoteConfig.decode(RemoteAppConfig.self, from: data)
+    }
+}
+
 struct IPhoneAppData {
     let ownerships: [IPhoneOwnership]
     let tasks: [IPhoneTask]
@@ -1003,10 +1045,31 @@ final class AppConfigStore: ObservableObject {
     @Published private(set) var config: RemoteAppConfig
     @Published private(set) var isLoading = false
     @Published private(set) var lastFetchedAt: Date?
+    @Published private(set) var lastErrorMessage: String?
+
+    private let defaults: UserDefaults
+    private let client: AppConfigClient?
+    private let cacheKey = "boubiga.remoteAppConfigCache.v1"
+    private let lastFetchedAtKey = "boubiga.remoteAppConfigLastFetchedAt.v1"
 
     init(config: RemoteAppConfig? = nil) {
+        self.defaults = .standard
+        self.client = AppConfigClientConfiguration.bundled().map { AppConfigClient(configuration: $0) }
         self.config = config ?? RemoteAppConfig.fallback
         loadBundledDefaults()
+        loadCachedConfig()
+    }
+
+    init(
+        config: RemoteAppConfig? = nil,
+        defaults: UserDefaults = .standard,
+        client: AppConfigClient?
+    ) {
+        self.defaults = defaults
+        self.client = client
+        self.config = config ?? RemoteAppConfig.fallback
+        loadBundledDefaults()
+        loadCachedConfig()
     }
 
     func loadBundledDefaults() {
@@ -1019,12 +1082,39 @@ final class AppConfigStore: ObservableObject {
         config = decoded
     }
 
+    func loadCachedConfig() {
+        guard let data = defaults.data(forKey: cacheKey),
+              let decoded = try? JSONDecoder.remoteConfig.decode(RemoteAppConfig.self, from: data) else {
+            return
+        }
+        config = decoded
+        lastFetchedAt = defaults.object(forKey: lastFetchedAtKey) as? Date
+    }
+
     func refreshConfig() async {
+        guard let client else {
+            lastErrorMessage = nil
+            return
+        }
+
         isLoading = true
         defer { isLoading = false }
-        // Supabase接続まではbundled JSONを最新値として扱う。
-        loadBundledDefaults()
-        lastFetchedAt = .now
+
+        do {
+            let fetchedConfig = try await client.fetchPublishedConfig()
+            config = fetchedConfig
+            lastFetchedAt = .now
+            lastErrorMessage = nil
+            saveCachedConfig(fetchedConfig)
+        } catch {
+            lastErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func saveCachedConfig(_ config: RemoteAppConfig) {
+        guard let data = try? JSONEncoder.boubiga.encode(config) else { return }
+        defaults.set(data, forKey: cacheKey)
+        defaults.set(lastFetchedAt, forKey: lastFetchedAtKey)
     }
 }
 
@@ -1205,6 +1295,10 @@ final class AppStore: ObservableObject {
 
     func ruleResult(for ownership: IPhoneOwnership, isPro: Bool = false) -> MatchedRuleResult {
         RuleEngine.evaluate(snapshot: DeviceSnapshot(ownership: ownership), config: remoteConfig, isPro: isPro)
+    }
+
+    func refreshRemoteConfig() async {
+        await configStore.refreshConfig()
     }
 
     func completeOnboarding(draft: OnboardingDraft) {

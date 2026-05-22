@@ -20,7 +20,7 @@ SUPABASE_PROJECT_REF=
 ## キーの扱い
 
 - `SUPABASE_URL`: iOSアプリ、管理画面、Edge Functionsで使用可
-- `SUPABASE_ANON_KEY`: iOSアプリ、管理画面、Edge Functionsで使用可
+- `SUPABASE_ANON_KEY`: 管理画面や将来のクライアント接続で使用可。現在のiOS公開設定取得では不要
 - `SUPABASE_SERVICE_ROLE_KEY`: サーバー/Edge Functions/ローカル管理作業だけで使用する
 - `BOUBIGA_SUPABASE_SERVICE_ROLE_KEY`: Edge Functions用。`SUPABASE_SERVICE_ROLE_KEY` と同じ値をSupabase secretsへ設定する
 - `SUPABASE_ADMIN_EMAIL`: 初期管理者を作るときの控え
@@ -42,6 +42,7 @@ SUPABASE_PROJECT_REF=
 3. そのユーザーのUUIDを `admin_profiles` に `owner` として登録する。
 4. `supabase/migrations` のSQLを適用する。
 5. Edge Functionsに環境変数を設定してデプロイする。
+6. `get-published-config` は認証なし公開APIとして `--no-verify-jwt` 付きでデプロイする。
 
 ## Data API設定
 
@@ -52,3 +53,15 @@ Supabase作成時のData API設定は次の方針にする。
 - Enable automatic RLS: ON
 
 `Automatically expose new tables` をOFFにするため、必要な権限は `202605220003_data_api_grants.sql` で明示的に付与する。
+
+## iOSアプリ側
+
+`boubiga/supabase_public_config.json` には公開設定取得用のURLだけを入れる。
+
+```json
+{
+  "supabase_url": "https://PROJECT_REF.supabase.co"
+}
+```
+
+service role key はiOSアプリに入れない。

@@ -43,6 +43,9 @@ Admin Web
 - `202605220002_seed_initial_config.sql`
   - アプリ同梱 `bundled_app_config.json` と同等の初期公開設定
   - iOS 26.5、バッテリー/容量しきい値、初期ルール3件
+- `202605220003_data_api_grants.sql`
+  - Data API の自動公開をOFFにした前提で、必要なテーブル権限だけを明示的に付与
+  - RLSは引き続き有効で、行レベルのアクセス制御はRLSで行う
 
 ## Edge Functions
 
@@ -53,7 +56,7 @@ Admin Web
 必要な環境変数:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- `BOUBIGA_SUPABASE_SERVICE_ROLE_KEY`
 
 ### preview-rules
 
@@ -62,7 +65,7 @@ Admin Web
 必要な環境変数:
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `BOUBIGA_SUPABASE_SERVICE_ROLE_KEY`
 
 ### publish-config
 
@@ -71,7 +74,7 @@ Admin Web
 必要な環境変数:
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `BOUBIGA_SUPABASE_SERVICE_ROLE_KEY`
 
 ## 管理者初期化
 

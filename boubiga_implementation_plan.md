@@ -30,6 +30,7 @@
 - Apple Developer Team ID `RSB2T5LYYP` / Bundle ID `com.boubiga` へXcode設定を更新
 - App Store Connectに買い切りPro商品 `boubiga_pro_lifetime` を作成済み
 - Supabase初期DBスキーマ、RLS、初期公開JSON seed を追加
+- Supabase Data APIの自動公開OFF前提で、必要なGRANTを明示するmigrationを追加
 - Supabase Edge Functions の `get-published-config` / `preview-rules` / `publish-config` を追加
 - サーバー設計メモを `docs/server/supabase_design.md` に整理
 - Supabaseキー記入用の `.env.local` 雛形、共有用 `.env.example`、セットアップメモを追加
@@ -1437,6 +1438,7 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 [x] published_configsを作成
 [x] audit_logsを作成
 [x] RLS policyを設定
+[x] Data API用の明示GRANTを設定
 [x] get-published-config Edge Functionを作成
 [x] preview-rules Edge Functionを作成
 [x] publish-config Edge Functionを作成

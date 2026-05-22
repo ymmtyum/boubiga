@@ -9,16 +9,15 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const supabaseUrl = Deno.env.get("BOUBIGA_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("BOUBIGA_SUPABASE_SERVICE_ROLE_KEY") ??
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!supabaseUrl || !anonKey) {
+  if (!supabaseUrl || !serviceRoleKey) {
     return jsonResponse({ error: "Supabase environment variables are missing" }, 500);
   }
 
-  const supabase = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: request.headers.get("Authorization") ?? "" } },
-  });
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const { data, error } = await supabase
     .from("published_configs")

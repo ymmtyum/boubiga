@@ -33,8 +33,9 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = Deno.env.get("BOUBIGA_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("BOUBIGA_SUPABASE_SERVICE_ROLE_KEY") ??
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !serviceRoleKey) {
     return jsonResponse({ error: "Supabase environment variables are missing" }, 500);

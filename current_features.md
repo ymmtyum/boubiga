@@ -71,6 +71,7 @@ boubiga は、iPhone の所有状態と使用感を軽く記録し、買い替�
 - Supabase用の初期DBスキーマを `supabase/migrations` に追加しています。
 - 管理者プロフィール、設定バージョン、iOS情報、しきい値、ガイド、アクション項目、ルール、公開設定、監査ログを管理するテーブルがあります。
 - RLSを有効にし、管理系テーブルは `admin_profiles` の `owner` / `editor` / `viewer` で制御する方針です。
+- Data APIの自動公開はOFFにし、必要なテーブル権限だけをmigrationで明示的に付与しています。
 - `published_configs` の current JSONだけをアプリ配信用として扱います。
 - Edge Functionsとして、公開設定取得の `get-published-config`、管理者向けルール確認の `preview-rules`、公開処理の `publish-config` を用意しています。
 - サーバー設計とデプロイ手順は `docs/server/supabase_design.md` にまとめています。

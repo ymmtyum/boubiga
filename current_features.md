@@ -76,7 +76,7 @@ boubiga は、iPhone の所有状態と使用感を軽く記録し、買い替�
 - Edge Functionsとして、公開設定取得の `get-published-config`、管理者向けルール確認の `preview-rules`、公開処理の `publish-config` を用意しています。
 - サーバー設計とデプロイ手順は `docs/server/supabase_design.md` にまとめています。
 - SupabaseのIDやキーは `.env.local` に記入し、共有用の雛形は `.env.example` に置いています。記入手順は `docs/server/supabase_setup.md` にまとめています。
-- 実際の接続には、Supabaseプロジェクト作成、migration適用、管理者ユーザー作成、Edge Functionsデプロイ、環境変数設定が必要です。
+- Supabaseプロジェクトへのmigration適用、管理者owner登録、Edge Functionsデプロイ、環境変数設定は完了済みです。
 
 ## 診断とPro導線
 

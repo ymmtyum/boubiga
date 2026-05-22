@@ -1443,11 +1443,11 @@ MVPでは、全体最新バージョンで判定してもよいが、古い端�
 [x] preview-rules Edge Functionを作成
 [x] publish-config Edge Functionを作成
 [x] 初期published_configを投入するseed SQLを作成
-[ ] Supabaseプロジェクトへmigrationを適用
-[ ] Supabase Authの管理者ユーザーを作成
-[ ] admin_profilesへ初期ownerを追加
-[ ] Edge Functionsをデプロイ
-[ ] Edge Functionの環境変数を設定
+[x] Supabaseプロジェクトへmigrationを適用
+[x] Supabase Authの管理者ユーザーを作成
+[x] admin_profilesへ初期ownerを追加
+[x] Edge Functionsをデプロイ
+[x] Edge Functionの環境変数を設定
 [x] Supabaseキー記入用の.env雛形を作成
 ```
 

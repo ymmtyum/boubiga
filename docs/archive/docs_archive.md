@@ -22,6 +22,7 @@
 - Supabase Edge Functions の `get-published-config`、`preview-rules`、`publish-config` を追加した
 - サーバー設計、管理者初期化、デプロイ順を `docs/server/supabase_design.md` に整理した
 - SupabaseのIDやキーを記入する `.env.local`、共有用 `.env.example`、セットアップ手順 `docs/server/supabase_setup.md` を追加した
+- Supabaseリモートプロジェクトへmigrationを適用し、Edge Functionsをデプロイし、初期管理者を `owner` として登録した
 - タブは中央（apple ネイティブ）に戻して、いったん `TabView` ベースで確認できる状態にした
 - マイiPhoneホームは、現在のiPhoneを主役にして情報量を少し絞った
 - 「このiPhoneを検出しました」は登録済み状態で常設カードにせず、軽いサマリー表示にした

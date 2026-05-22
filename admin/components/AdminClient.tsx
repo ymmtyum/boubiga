@@ -29,6 +29,7 @@ export function AdminClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSendingLink, setIsSendingLink] = useState(false);
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -141,6 +142,31 @@ export function AdminClient() {
       setError(errorMessage(nextError));
     } finally {
       setIsSigningIn(false);
+    }
+  }
+
+  async function handleSendLoginLink() {
+    if (!email) {
+      setError("メールアドレスを入力してください。");
+      return;
+    }
+
+    setIsSendingLink(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (otpError) throw otpError;
+      setMessage("ログインリンクを送信しました。メール内のリンクから開いてください。");
+    } catch (nextError) {
+      setError(errorMessage(nextError));
+    } finally {
+      setIsSendingLink(false);
     }
   }
 
@@ -258,6 +284,14 @@ export function AdminClient() {
             </label>
             <button className="button" disabled={isSigningIn} type="submit">
               {isSigningIn ? "ログイン中" : "ログイン"}
+            </button>
+            <button
+              className="button secondary"
+              disabled={isSendingLink}
+              type="button"
+              onClick={handleSendLoginLink}
+            >
+              {isSendingLink ? "送信中" : "メールでログインリンクを送る"}
             </button>
           </form>
         </section>

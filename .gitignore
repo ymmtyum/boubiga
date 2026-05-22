@@ -1,0 +1,20 @@
+.DS_Store
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Local assistant/worktree state
+.claude/
+
+# Xcode user state
+*.xcuserstate
+xcuserdata/
+
+# Swift Package Manager
+.build/
+
+# Supabase local runtime
+.branches/
+.temp/

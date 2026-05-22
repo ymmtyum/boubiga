@@ -29,4 +29,4 @@ http://localhost:3000
 Use a Supabase Auth user that exists in `admin_profiles` as `owner` or `editor`.
 
 If the user does not have a password yet, enter the email address and choose
-the email login link button.
+the email login link button. The login flow has been verified locally.

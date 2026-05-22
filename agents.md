@@ -24,6 +24,7 @@
 - ローカル配信ルールの土台として、`bundled_app_config.json`、`DeviceSnapshot`、`RemoteAppConfig`、`RuleEngine` を追加済みです。ホームのインサイト表示と診断結果の一部へ接続済みで、やることリスト本体への全面接続は次フェーズで段階的に進めます。
 - Pro買い切りのアプリ側土台として、StoreKit 2の `EntitlementManager`、Product ID `boubiga_pro_lifetime`、Paywall、購入・復元・ローカルPro判定を追加済みです。Apple Developer / App Store Connect側は Team ID `RSB2T5LYYP`、Bundle ID `com.boubiga`、Product ID `boubiga_pro_lifetime` で進めます。
 - Supabaseサーバー土台として、`supabase/migrations` の初期DBスキーマ/seed、`get-published-config`、`preview-rules`、`publish-config` Edge Functions、`docs/server/supabase_design.md` を追加済みです。実接続にはSupabaseプロジェクト作成、migration適用、管理者owner追加、Edge Functionsデプロイ、環境変数設定が必要です。
+- Web管理画面MVPとして、`admin/` に Next.js 管理画面を追加済みです。Supabase Authログイン、メールリンクログイン、公開設定確認、最新iOS下書き編集、しきい値編集、ルールプレビュー、公開処理の土台があります。ログイン確認は完了済みで、次は `action_items` / `rules` / `guides` 編集UIを追加します。
 - 初回導線では、iPhone 検出 → 写真つきの機種確認 → カラー選択 → 登録完了までをオンボーディングとしてまとめ、終わったらすぐホームに入る方針です。
 - オンボーディングのカラー選択では、全カラーを写真つきカード一覧で表示し、写真・色名・選択状態で選べる形を優先します。対応画像がない場合は代表画像や色スウォッチにフォールバックします。
 - 検出できた機種は原則確定扱いにし、モデル選択は「違うiPhoneを選ぶ」を押した場合だけ補助フローとして出します。
